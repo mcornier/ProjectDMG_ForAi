@@ -6,6 +6,10 @@ namespace ProjectDMG;
 public partial class Form : System.Windows.Forms.Form {
 
     ProjectDMG dmg;
+    IKeyEventGameboyJoypad keyEventGameboyJoypad
+    {
+        get => dmg.joypad as IKeyEventGameboyJoypad;
+    }
 
     public Form() {
         InitializeComponent();
@@ -16,11 +20,11 @@ public partial class Form : System.Windows.Forms.Form {
     }
 
     private void Key_Down(object sender, KeyEventArgs e) {
-        if (dmg.power_switch) dmg.joypad.handleKeyDown(e);
+        if (dmg.power_switch) keyEventGameboyJoypad.HandleInputDown(e);
     }
 
     private void Key_Up(object sender, KeyEventArgs e) {
-        if (dmg.power_switch) dmg.joypad.handleKeyUp(e);
+        if (dmg.power_switch) keyEventGameboyJoypad.HandleInputUp(e);
     }
 
     private void Drag_Drop(object sender, DragEventArgs e) {
