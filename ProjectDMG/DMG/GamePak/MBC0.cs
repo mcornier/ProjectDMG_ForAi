@@ -1,30 +1,30 @@
-﻿namespace ProjectDMG.DMG.GamePak {
-    class MBC0 : IGamePak {
+﻿namespace ProjectDMG.DMG.GamePak; 
 
-        private byte[] ROM;
+class MBC0 : IGamePak {
 
-        public void Init(byte[] ROM) {
-            this.ROM = ROM;
-        }
+    private byte[] ROM;
 
-        public byte ReadERAM(ushort addr) {
-            return 0xFF; //MBC0 dosn't have ERAM
-        }
+    public void Init(byte[] ROM) {
+        this.ROM = ROM;
+    }
 
-        public byte ReadLoROM(ushort addr) {
-            return ROM[addr];
-        }
-        
-        public byte ReadHiROM(ushort addr){
-            return ROM[addr];
-        }
+    public byte ReadERAM(ushort addr) {
+        return 0xFF; //MBC0 dosn't have ERAM
+    }
 
-        public void WriteERAM(ushort addr, byte value) {
-            //MBC0 should ignore writes
-        }
+    public byte ReadLoROM(ushort addr) {
+        return ROM[addr];
+    }
+    
+    public byte ReadHiROM(ushort addr){
+        return ROM[addr];
+    }
 
-        public void WriteROM(ushort addr, byte value) {
-            //MBC0 should ignore writes
-        }
+    public void WriteERAM(ushort addr, byte value) {
+        //MBC0 should ignore writes
+    }
+
+    public void WriteROM(ushort addr, byte value) {
+        //MBC0 should ignore writes
     }
 }
