@@ -2,7 +2,7 @@
 using static ProjectDMG.Utils.BitOps;
 
 namespace ProjectDMG; 
-public class PPU {
+public class PixelProcessingUnit {
 
     private const int SCREEN_WIDTH = 160;
     private const int SCREEN_HEIGHT = 144;
@@ -22,13 +22,13 @@ public class PPU {
 
     private Form window;
 
-    public PPU(Form window) {
+    public PixelProcessingUnit(Form window) {
         this.window = window;
         bmp = new DirectBitmap();
         window.pictureBox.Image = bmp.Bitmap;
     }
 
-    public void update(int cycles, MMU mmu) {
+    public void update(int cycles, MemoryManagementUnit mmu) {
         scanlineCounter += cycles;
         byte currentMode = (byte)(mmu.STAT & 0x3); //Current Mode Mask
 
@@ -90,7 +90,7 @@ public class PPU {
         }
     }
 
-    private void changeSTATMode(int mode, MMU mmu) {
+    private void changeSTATMode(int mode, MemoryManagementUnit mmu) {
         byte STAT = (byte)(mmu.STAT & ~0x3);
         mmu.STAT = (byte)(STAT | mode);
         //Accessing OAM - Mode 2 (80 cycles)
@@ -112,7 +112,7 @@ public class PPU {
 
     }
 
-    private void drawScanLine(MMU mmu) {
+    private void drawScanLine(MemoryManagementUnit mmu) {
         byte LCDC = mmu.LCDC;
         if (isBit(0, LCDC)) { //Bit 0 - BG Display (0=Off, 1=On)
             renderBG(mmu);
@@ -122,7 +122,7 @@ public class PPU {
         }
     }
 
-    private void renderBG(MMU mmu) {
+    private void renderBG(MemoryManagementUnit mmu) {
         byte WX = (byte)(mmu.WX - 7); //WX needs -7 Offset
         byte WY = mmu.WY;
         byte LY = mmu.LY;
@@ -203,7 +203,7 @@ public class PPU {
         return isBit(4, LCDC) ? (ushort)0x8000 : (ushort)0x8800; //0x8800 signed area
     }
 
-    private void renderSprites(MMU mmu) {
+    private void renderSprites(MemoryManagementUnit mmu) {
         byte LY = mmu.LY;
         byte LCDC = mmu.LCDC;
         for (int i = 0x9C; i >= 0; i -= 4) { //0x9F OAM Size, 40 Sprites x 4 bytes:

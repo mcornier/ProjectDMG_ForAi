@@ -28,7 +28,7 @@ public class JOYPAD {
         }
     }
 
-    public void update(MMU mmu) {
+    public void update(MemoryManagementUnit mmu) {
         byte JOYP = mmu.JOYP;
         if(!isBit(4, JOYP)) {
             mmu.JOYP = (byte)((JOYP & 0xF0) | pad);

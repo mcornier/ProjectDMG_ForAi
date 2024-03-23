@@ -5,7 +5,7 @@ namespace ProjectDMG;
 
 class CPU { // Sharp LR35902 CPU
 
-    private MMU mmu;
+    private MemoryManagementUnit mmu;
     private ushort PC;
     private ushort SP;
 
@@ -27,7 +27,7 @@ class CPU { // Sharp LR35902 CPU
     private bool HALT_BUG;
     private int cycles;
 
-    public CPU(MMU mmu) {
+    public CPU(MemoryManagementUnit mmu) {
         this.mmu = mmu;
         AF = 0x01B0;
         BC = 0x0013;

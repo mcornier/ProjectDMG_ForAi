@@ -15,12 +15,12 @@ public class TIMER {
     private int divCounter;
     private int timerCounter;
 
-    public void update(int cycles, MMU mmu) {
+    public void update(int cycles, MemoryManagementUnit mmu) {
         handleDivider(cycles, mmu);
         handleTimer(cycles, mmu);
     }
 
-    private void handleDivider(int cycles, MMU mmu) {
+    private void handleDivider(int cycles, MemoryManagementUnit mmu) {
         divCounter += cycles;
         while (divCounter >= DMG_DIV_FREQ) {
             mmu.DIV++;
@@ -28,7 +28,7 @@ public class TIMER {
         }
     }
 
-    private void handleTimer(int cycles, MMU mmu) {
+    private void handleTimer(int cycles, MemoryManagementUnit mmu) {
         if (mmu.TAC_ENABLED) {
             timerCounter += cycles;
             while (timerCounter >= TAC_FREQ[mmu.TAC_FREQ]) {

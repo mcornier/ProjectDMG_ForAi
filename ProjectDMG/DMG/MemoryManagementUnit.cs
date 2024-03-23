@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using static ProjectDMG.Utils.BitOps;
 
 namespace ProjectDMG; 
-public class MMU {
+public class MemoryManagementUnit {
 
     //GamePak
     private IGamePak gamePak;
@@ -35,7 +35,7 @@ public class MMU {
     public byte IE { get { return HRAM[0x7F]; } set { HRAM[0x7F] = value; } }//FFFF - IE - Interrupt Enable (R/W)
     public byte IF { get { return IO[0x0F]; } set { IO[0x0F] = value; } }//FF0F - IF - Interrupt Flag (R/W)
 
-    //PPU IO Regs
+    //PPU (PixelProcessingUnit) IO Regs
     public byte LCDC { get { return IO[0x40]; } }//FF40 - LCDC - LCD Control (R/W)
     public byte STAT { get { return IO[0x41]; } set { IO[0x41] = value; } }//FF41 - STAT - LCDC Status (R/W)
 
@@ -54,7 +54,7 @@ public class MMU {
 
     public byte JOYP { get { return IO[0x00]; } set { IO[0x00] = value; } }//FF00 - JOYP
 
-    public MMU() {
+    public MemoryManagementUnit() {
         //FF4D - KEY1 - CGB Mode Only - Prepare Speed Switch
         //HardCoded to FF to identify DMG as 00 is GBC
         IO[0x4D] = 0xFF;
