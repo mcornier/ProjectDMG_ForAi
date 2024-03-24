@@ -1,4 +1,6 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Drawing.Imaging;
+using System.Runtime.CompilerServices;
 using static ProjectDMG.Utils.BitOps;
 
 namespace ProjectDMG; 
@@ -11,6 +13,7 @@ public class PixelProcessingUnit {
     private const int VRAM_CYCLES = 172;
     private const int HBLANK_CYCLES = 204;
     private const int SCANLINE_CYCLES = 456;
+    private int counter = 0;
 
     private const int VBLANK_INTERRUPT = 0;
     private const int LCD_INTERRUPT = 1;
@@ -26,6 +29,8 @@ public class PixelProcessingUnit {
         this.window = window;
         bmp = new DirectBitmap();
         window.pictureBox.Image = bmp.Bitmap;
+        if(counter == 60) { bmp.Bitmap.Save("photos"+ DateTime.Now, ImageFormat.Bmp); counter = 0; }
+        else counter++;
     }
 
     public void update(int cycles, MemoryManagementUnit mmu) {
