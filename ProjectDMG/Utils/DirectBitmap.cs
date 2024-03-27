@@ -1,12 +1,25 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace ProjectDMG; 
 public class DirectBitmap : IDisposable {
-    public Bitmap Bitmap { get; private set; }
+
+    private Bitmap bitmap;
+    private Bitmap bitmapCopy;
+    public Bitmap Bitmap {
+        get
+        {
+            return bitmap;
+        }
+        private set
+        {
+            bitmap = value;
+        }
+    }
     public Int32[] Bits { get; private set; }
     public bool Disposed { get; private set; }
     public static int Height = 144;
@@ -18,6 +31,16 @@ public class DirectBitmap : IDisposable {
         Bits = new Int32[Width * Height];
         BitsHandle = GCHandle.Alloc(Bits, GCHandleType.Pinned);
         Bitmap = new Bitmap(Width, Height, Width * 4, PixelFormat.Format32bppRgb, BitsHandle.AddrOfPinnedObject());
+        bitmapCopy = new Bitmap(Width, Height, Width * 4, PixelFormat.Format32bppRgb, BitsHandle.AddrOfPinnedObject());
+    }
+
+    public byte[] ToByteArray(ImageFormat format)
+    {
+        using (var stream = new MemoryStream())
+        {
+            bitmapCopy.Save(stream, format);
+            return stream.ToArray();
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -35,7 +58,8 @@ public class DirectBitmap : IDisposable {
     public void Dispose() {
         if (Disposed) return;
         Disposed = true;
-        Bitmap.Dispose();
+        bitmap?.Dispose();
+        bitmapCopy?.Dispose();
         BitsHandle.Free();
     }
 }

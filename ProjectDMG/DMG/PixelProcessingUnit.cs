@@ -29,7 +29,10 @@ public class PixelProcessingUnit {
         this.window = window;
         bmp = new DirectBitmap();
         window.pictureBox.Image = bmp.Bitmap;
-        if(counter == 60) { bmp.Bitmap.Save("photos"+ DateTime.Now, ImageFormat.Bmp); counter = 0; }
+        if(counter == 60) {
+            //bmp.Bitmap.Save("photos"+ DateTime.Now, ImageFormat.Bmp);
+            counter = 0;
+        }
         else counter++;
     }
 
