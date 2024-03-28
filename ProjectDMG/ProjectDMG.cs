@@ -85,14 +85,20 @@ public class ProjectDMG {
 
                     timer.update(cpuCycles, mmu);
                     ppu.update(cpuCycles, mmu);
-                    joypad.Update(mmu);
+                    //joypad.Update(mmu);
+                    joypadLlm.Update(mmu);
                     handleInterrupts();
                 }
                 fpsCounter++;
                 cyclesThisUpdate -= Constants.CYCLES_PER_UPDATE;
 
-                if (!clientGptPlayer.IsCallingApi)
+                if (!clientGptPlayer.IsCallingApi || fpsCounter%5000 == 4999)
                 {
+                    if(fpsCounter % 5000 == 4999)
+                    {
+                        clientGptPlayer.IsCallingApi = false;
+                    }
+
                     // Conversion de l'image en byte[]
                     byte[] img = ppu.bmp.ToByteArray(ImageFormat.Png);
 
@@ -102,16 +108,14 @@ public class ProjectDMG {
                     // Sauvegarde de l'image sur le disque
                     File.WriteAllBytes(path, img);
 
-                    var r = clientGptPlayer.CallLlmAsync(img).Result;
-
-                    joypadLlm.HandleInputDown(r);
-                    joypadLlm.HandleInputUp(r);
+                    joypadLlm.HandleInputUp(gameboyInputs);
 
                     Task.Run(async () =>
                     {
                         var r = await clientGptPlayer.CallLlmAsync(img);
 
                         gameboyInputs = r;
+                        joypadLlm.HandleInputDown(r);
                     });
                 }
             }

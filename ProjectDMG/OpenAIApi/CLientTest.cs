@@ -123,23 +123,22 @@ Example JSON response format:
   'currentState': 'Battle'
 }
 
-Ensure the response strictly follows this JSON structure for every analysis.";
+Ensure the response strictly follows this JSON structure for every analysis. Do not use markdown like ```json ```.";
 
     private OpenAIAPI _api;
-    private bool isCallingApi;
 
-    public bool IsCallingApi { get => isCallingApi;  }
+    public bool IsCallingApi { get; set; }
 
     public ClientGptPlayer(string apiKey)
     {
-        isCallingApi = false;
+        IsCallingApi = false;
         _api = new OpenAIAPI(new APIAuthentication(apiKey));
         _api.ApiUrlFormat = "http://localhost:1234/v1/chat/completions";
     }
 
     public async Task<GameboyInputs> CallLlmAsync(byte[] imageData)
     {
-        isCallingApi = true;
+        IsCallingApi = true;
 
         var chat = _api.Chat.CreateConversation();
         chat.Model = Model.GPT4_Vision; // Utilisez le bon modèle GPT Vision ici
@@ -153,18 +152,20 @@ Ensure the response strictly follows this JSON structure for every analysis.";
             // Obtenir la réponse du modèle
             var response = await chat.GetResponseFromChatbotAsync();
 
-            isCallingApi = false;
+            IsCallingApi = false;
 
             string selectedInput = "";
 
             try
             {
-                dynamic jsonResponse = JsonConvert.DeserializeObject<dynamic>(response);
+                string cleanResponse = response.Replace("```json", "").Replace("```", "").Trim();
+
+                dynamic jsonResponse = JsonConvert.DeserializeObject<dynamic>(cleanResponse);
 
                 // Analyser la réponse JSON pour extraire l'entrée de jeu
                 selectedInput = jsonResponse?.selectedInput;
             }
-            catch
+            catch(Exception e)
             {
                 selectedInput = "";
             }
