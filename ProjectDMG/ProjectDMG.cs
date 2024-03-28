@@ -22,7 +22,12 @@ public class ProjectDMG {
     private MemoryManagementUnit mmu;
     private PixelProcessingUnit ppu;
     private TIMER timer;
-    public IGameboyJoypad joypad;    public InputGameboyJoypad joypadLlm;    public ClientGptPlayer clientGptPlayer;
+    public IGameboyJoypad joypad;
+    public InputGameboyJoypad joypadLlm;
+    public GameboyInputs gameboyInputs;
+
+    public ClientGptPlayer clientGptPlayer;
+
     public bool power_switch;
 
     public void POWER_ON(string cartName) {
@@ -31,7 +36,9 @@ public class ProjectDMG {
         ppu = new PixelProcessingUnit(window);
         timer = new TIMER();
         joypad = new QwertyGameboyJoypad();
-        joypadLlm = new InputGameboyJoypad();        clientGptPlayer = new ClientGptPlayer("APIKEY");
+        joypadLlm = new InputGameboyJoypad();
+        clientGptPlayer = new ClientGptPlayer("APIKEY");
+
         mmu.loadGamePak(cartName);
 
         power_switch = true;
@@ -78,12 +85,13 @@ public class ProjectDMG {
 
                     timer.update(cpuCycles, mmu);
                     ppu.update(cpuCycles, mmu);
-                    joypad.Update(mmu);                    handleInterrupts();
+                    joypad.Update(mmu);
+                    handleInterrupts();
                 }
                 fpsCounter++;
                 cyclesThisUpdate -= Constants.CYCLES_PER_UPDATE;
 
-                if (fpsCounter % 100 == 99 && !clientGptPlayer.IsCallingApi)
+                if (!clientGptPlayer.IsCallingApi)
                 {
                     // Conversion de l'image en byte[]
                     byte[] img = ppu.bmp.ToByteArray(ImageFormat.Png);
@@ -94,12 +102,17 @@ public class ProjectDMG {
                     // Sauvegarde de l'image sur le disque
                     File.WriteAllBytes(path, img);
 
-                    window.Invoke((MethodInvoker)(async () => {
+                    var r = clientGptPlayer.CallLlmAsync(img).Result;
+
+                    joypadLlm.HandleInputDown(r);
+                    joypadLlm.HandleInputUp(r);
+
+                    Task.Run(async () =>
+                    {
                         var r = await clientGptPlayer.CallLlmAsync(img);
 
-                        joypadLlm.HandleInputDown(r);
-                        joypadLlm.HandleInputUp(r);
-                    }));
+                        gameboyInputs = r;
+                    });
                 }
             }
 

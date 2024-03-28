@@ -108,8 +108,22 @@ public class ClientLlmPlayer
 
 public class ClientGptPlayer
 {
-    const string SystemPrompt =
-        "Given a screenshot from a Pokémon game on the Game Boy, analyze the image and respond with the most suitable action to take (Up, Down, Left, Right, A, B, Start, Select), provide a brief description of the current scene in the game, and identify the game's current state (Menu, World, Battle). Please format your response as a JSON object with the keys \"selectedInput\", \"imageDescription\", and \"currentState\".";
+    //const string SystemPrompt =
+    //    "Given a screenshot from a Pokémon game on the Game Boy, analyze the image and respond with the most suitable action to take (Up, Down, Left, Right, A, B, Start, Select), provide a brief description of the current scene in the game, and identify the game's current state (Menu, World, Battle). Please format your response as a JSON object with the keys \"selectedInput\", \"imageDescription\", and \"currentState\".";
+
+    const string SystemPrompt = @"
+Given a screenshot from a Pokémon game on the Game Boy, analyze the image and respond with the most suitable action to take (Up, Down, Left, Right, A, B, Start, Select), provide a brief description of the current scene in the game, and identify the game's current state (Menu, World, Battle). 
+Please respond in English and format your response as a JSON object with the keys 'selectedInput', 'imageDescription', and 'currentState'. 
+
+Example JSON response format:
+
+{
+  'selectedInput': 'A',
+  'imageDescription': 'The screen shows a Pokémon battle scene. A wild Pikachu faces off against the player's Squirtle. The player's Pokémon menu is open, with options to Fight, Bag, Pokémon, and Run.',
+  'currentState': 'Battle'
+}
+
+Ensure the response strictly follows this JSON structure for every analysis.";
 
     private OpenAIAPI _api;
     private bool isCallingApi;
@@ -120,6 +134,7 @@ public class ClientGptPlayer
     {
         isCallingApi = false;
         _api = new OpenAIAPI(new APIAuthentication(apiKey));
+        _api.ApiUrlFormat = "http://localhost:1234/v1/chat/completions";
     }
 
     public async Task<GameboyInputs> CallLlmAsync(byte[] imageData)
@@ -133,16 +148,33 @@ public class ClientGptPlayer
         // Ajouter l'entrée d'image à la conversation
         chat.AppendUserInput("", new ImageInput(imageData));
 
-        // Obtenir la réponse du modèle
-        var response = await chat.GetResponseFromChatbotAsync();
+        try
+        {
+            // Obtenir la réponse du modèle
+            var response = await chat.GetResponseFromChatbotAsync();
 
-        isCallingApi = false;
-        var jsonResponse = JsonConvert.DeserializeObject<dynamic>(response);
+            isCallingApi = false;
 
-        // Analyser la réponse JSON pour extraire l'entrée de jeu
-        string selectedInput = jsonResponse?.selectedInput;
+            string selectedInput = "";
 
-        // Convertir la chaîne d'entrée en énumération GameboyInputs
-        return Enum.TryParse<GameboyInputs>(selectedInput, out var input) ? input : GameboyInputs.None;
+            try
+            {
+                dynamic jsonResponse = JsonConvert.DeserializeObject<dynamic>(response);
+
+                // Analyser la réponse JSON pour extraire l'entrée de jeu
+                selectedInput = jsonResponse?.selectedInput;
+            }
+            catch
+            {
+                selectedInput = "";
+            }
+
+            // Convertir la chaîne d'entrée en énumération GameboyInputs
+            return Enum.TryParse<GameboyInputs>(selectedInput, out var input) ? input : GameboyInputs.None;
+        }
+        catch
+        {
+            return GameboyInputs.None;
+        }
     }
 }
